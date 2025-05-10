@@ -1,3 +1,13 @@
+# Learnings 2025-05
+
+Wow, openrpc!
+
+https://dev.to/vearutop/json-rpc-2-0-with-swagger-ui-2h3g
+
+https://open-rpc.org
+
+https://github.com/open-rpc
+
 # Learnings (2025-05-10)
 
 - Tried `openfunctions.json` for https://github.com/janwilmake/dorm and https://github.com/janwilmake/remote-sql-cursor
