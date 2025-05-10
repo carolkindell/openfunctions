@@ -1,4 +1,5 @@
 {
+  "$schema": "./openfunctions.schema.json",
   "openfunctions": "0.0.1",
 
   "info": {
@@ -9,20 +10,8 @@
   },
 
   "runtime": {
-    "node": ">=16.0.0",
-    "dependencies": {
-      "database-client": "^3.0.0"
-    }
+    "node": ">=16.0.0"
   },
-
-  "servers": [
-    {
-      "url": "https://example.com",
-      "protocol": "rest"
-    }
-  ],
-
-  "state": { "$ref": "#/components/schemas/State" },
 
   "environment": {
     "DATABASE_URL": {
@@ -43,9 +32,8 @@
     }
   },
 
-  "functions": [
-    {
-      "name": "createUser",
+  "functions": {
+    "createUser": {
       "description": "Creates a new user",
       "params": [
         {
@@ -94,8 +82,7 @@
         }
       ]
     },
-    {
-      "name": "User.constructor",
+    "User/constructor": {
       "description": "Creates a new User instance",
       "params": [
         {
@@ -114,8 +101,7 @@
       "requires": [],
       "async": false
     },
-    {
-      "name": "User.save",
+    "User/save": {
       "description": "Persists user to database",
       "params": [],
       "result": {
@@ -139,8 +125,7 @@
       "async": true,
       "instanceMethod": true
     },
-    {
-      "name": "User.findById",
+    "User/findById": {
       "description": "Finds a user by ID",
       "params": [
         {
@@ -168,17 +153,18 @@
       "async": true,
       "staticMethod": true
     }
-  ],
+  },
 
   "constants": {
     "DEFAULT_PAGE_SIZE": {
-      "type": "number",
-      "value": 25,
+      "schema": { "type": "number" },
       "description": "Default number of items per page"
     },
     "USER_ROLES": {
-      "type": "enum",
-      "values": ["ADMIN", "EDITOR", "VIEWER"],
+      "schema": {
+        "type": "array",
+        "items": { "type": "string", "enum": ["ADMIN", "EDITOR", "VIEWER"] }
+      },
       "description": "Available user roles"
     }
   },
@@ -242,6 +228,16 @@
           "code": { "type": "string", "description": "Error code" }
         },
         "required": ["field", "message"]
+      },
+      "State": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/User" },
+            "description": "Collection of users"
+          }
+        }
       }
     }
   }

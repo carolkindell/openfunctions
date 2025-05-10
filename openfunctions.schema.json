@@ -36,44 +36,19 @@
     },
     "runtime": {
       "type": "object",
-      "description": "Runtime requirements for the module/package",
-      "properties": {
-        "node": {
-          "type": "string",
-          "description": "Node.js version requirement"
-        },
-        "dependencies": {
-          "type": "object",
-          "description": "Dependencies required by the module/package",
-          "additionalProperties": {
-            "type": "string",
-            "description": "Semver version constraint"
-          }
+      "description": "Runtime requirements for the module/package.",
+      "properties": {},
+      "examples": [
+        {
+          "node": ">=16.0.0"
         }
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "description": "version requirement for the runtime"
       }
     },
-    "servers": {
-      "type": "array",
-      "description": "Server information for API endpoints",
-      "items": {
-        "type": "object",
-        "required": ["url"],
-        "properties": {
-          "url": {
-            "type": "string",
-            "description": "URL of the server"
-          },
-          "protocol": {
-            "type": "string",
-            "description": "Protocol used by the server"
-          }
-        }
-      }
-    },
-    "state": {
-      "description": "State definition for the module/package",
-      "$ref": "#/definitions/schema"
-    },
+
     "environment": {
       "type": "object",
       "description": "Environment variables required by the module/package",
@@ -107,16 +82,12 @@
       }
     },
     "functions": {
-      "type": "array",
-      "description": "Functions exposed by the module/package",
-      "items": {
+      "type": "object",
+      "description": "Mapped object of functions exposed by the module/package. Every key is the function name. For classes use ClassName/constructor and ClassName/publicFunctionName",
+      "additionalProperties": {
         "type": "object",
-        "required": ["name", "description"],
+        "required": ["description"],
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the function"
-          },
           "description": {
             "type": "string",
             "description": "Description of the function"
@@ -270,18 +241,10 @@
       "description": "Constants defined by the module/package",
       "additionalProperties": {
         "type": "object",
-        "required": ["type"],
+        "required": ["schema"],
         "properties": {
-          "type": {
-            "type": "string",
-            "description": "Type of the constant"
-          },
-          "value": {
-            "description": "Value of the constant"
-          },
-          "values": {
-            "type": "array",
-            "description": "Possible values for enum constants"
+          "schema": {
+            "$ref": "#/definitions/schema"
           },
           "description": {
             "type": "string",
@@ -307,7 +270,7 @@
   "definitions": {
     "schema": {
       "description": "JSON Schema definition or reference",
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/definitions/schemaObject"
         },
