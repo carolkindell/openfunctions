@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "OpenFunctions Schema",
-  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language.\n\nAn openfunctions.json specification should be all that is required to use a library. A openfunctions.json should only define exported functions and classes, and functions/classes that can be created from those functions. \n\nTo define a class, use 'ClassName/constructor' and 'ClassName/publicFunctionName'. To define a function returned from another function, use 'ReturnedSchemaName/returnedFunctionName'.",
+  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language.\n\nAn openfunctions.json specification should be all that is required to use a library. A openfunctions.json should only define exported functions and classes, and functions/classes that can be created from those functions.",
   "type": "object",
   "required": ["openfunctions", "info", "functions"],
   "properties": {
@@ -91,6 +91,35 @@
             "type": "string",
             "description": "Description of the function"
           },
+
+          "exported": {
+            "type": "boolean",
+            "description": "This function can be imported"
+          },
+
+          "returnedFrom": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "This function can be accessed as a result from these other function(s)"
+          },
+
+          "requiredEnvironmentVariables": {
+            "type": "array",
+            "description": "Required Environment Variables for the function",
+            "items": {
+              "type": "string",
+              "description": "Requirement identifier"
+            }
+          },
+          "async": {
+            "type": "boolean",
+            "description": "Whether the function is asynchronous"
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "Whether the function is deprecated"
+          },
+
           "params": {
             "type": "array",
             "description": "Parameters accepted by the function",
@@ -176,30 +205,7 @@
               }
             }
           },
-          "requires": {
-            "type": "array",
-            "description": "Requirements for the function",
-            "items": {
-              "type": "string",
-              "description": "Requirement identifier"
-            }
-          },
-          "async": {
-            "type": "boolean",
-            "description": "Whether the function is asynchronous"
-          },
-          "deprecated": {
-            "type": "boolean",
-            "description": "Whether the function is deprecated"
-          },
-          "instanceMethod": {
-            "type": "boolean",
-            "description": "Whether the function is an instance method"
-          },
-          "staticMethod": {
-            "type": "boolean",
-            "description": "Whether the function is a static method"
-          },
+
           "examples": {
             "type": "array",
             "description": "Examples of function usage",
