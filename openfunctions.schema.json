@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "OpenFunctions Schema",
-  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language",
+  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language.\n\nAn openfunctions.json specification should be all that is required to use a library. A openfunctions.json should only define exported functions and classes, and functions/classes that can be created from those functions. \n\nTo define a class, use 'ClassName/constructor' and 'ClassName/publicFunctionName'. To define a function returned from another function, use 'ReturnedSchemaName/returnedFunctionName'.",
   "type": "object",
   "required": ["openfunctions", "info", "functions"],
   "properties": {
@@ -21,8 +21,7 @@
         },
         "version": {
           "type": "string",
-          "description": "Version of the module/package",
-          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          "description": "Version of the module/package"
         },
         "license": {
           "type": "string",
