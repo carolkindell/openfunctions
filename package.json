@@ -1,0 +1,9 @@
+{
+  "name": "openfunctions",
+  "version": "0.0.1",
+  "bin": "cli.js",
+  "repository": "https://github.com/carolkindell/openfunctions",
+  "scripts": {
+    "pub": "npm publish && git add . && git commit -m 'improvements' && git push && wrangler deploy"
+  }
+}

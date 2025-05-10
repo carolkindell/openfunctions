@@ -1,0 +1,8 @@
+name = "openfunctions"
+compatibility_date = "2025-05-09"
+dev.port = 3000
+assets.directory = "./"
+routes = [
+  { pattern = "openfunctions.com", custom_domain = true },
+  { pattern = "www.openfunctions.com", custom_domain = true }
+]

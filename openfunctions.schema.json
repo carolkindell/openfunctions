@@ -1,0 +1,402 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OpenFunctions Schema",
+  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language",
+  "type": "object",
+  "required": ["openfunctions", "info", "functions"],
+  "properties": {
+    "openfunctions": {
+      "type": "string",
+      "description": "Version of the OpenFunctions specification",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "info": {
+      "type": "object",
+      "description": "Metadata about the module/package",
+      "required": ["title", "version"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Name of the module/package"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the module/package",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "license": {
+          "type": "string",
+          "description": "License of the module/package"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the module/package"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "description": "Runtime requirements for the module/package",
+      "properties": {
+        "node": {
+          "type": "string",
+          "description": "Node.js version requirement"
+        },
+        "dependencies": {
+          "type": "object",
+          "description": "Dependencies required by the module/package",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Semver version constraint"
+          }
+        }
+      }
+    },
+    "servers": {
+      "type": "array",
+      "description": "Server information for API endpoints",
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the server"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol used by the server"
+          }
+        }
+      }
+    },
+    "state": {
+      "description": "State definition for the module/package",
+      "$ref": "#/definitions/schema"
+    },
+    "environment": {
+      "type": "object",
+      "description": "Environment variables required by the module/package",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "description": "Whether the environment variable is required"
+          },
+          "default": {
+            "description": "Default value for the environment variable"
+          },
+          "enum": {
+            "type": "array",
+            "description": "Allowed values for the environment variable"
+          },
+          "sensitive": {
+            "type": "boolean",
+            "description": "Whether the environment variable contains sensitive information"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the environment variable"
+          },
+          "format": {
+            "type": "string",
+            "description": "Format of the environment variable"
+          }
+        }
+      }
+    },
+    "functions": {
+      "type": "array",
+      "description": "Functions exposed by the module/package",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the function"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the function"
+          },
+          "params": {
+            "type": "array",
+            "description": "Parameters accepted by the function",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the parameter"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the parameter"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether the parameter is required"
+                },
+                "schema": {
+                  "$ref": "#/definitions/schema",
+                  "description": "Schema of the parameter"
+                }
+              }
+            }
+          },
+          "result": {
+            "type": "object",
+            "description": "Result of the function",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the result"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the result"
+              },
+              "schema": {
+                "$ref": "#/definitions/schema",
+                "description": "Schema of the result"
+              }
+            }
+          },
+          "effects": {
+            "type": "array",
+            "description": "Side effects of the function",
+            "items": {
+              "type": "object",
+              "required": ["pointer", "effect"],
+              "properties": {
+                "pointer": {
+                  "type": "string",
+                  "description": "JSON pointer to the affected state"
+                },
+                "effect": {
+                  "type": "string",
+                  "description": "Type of effect",
+                  "enum": ["push", "update", "delete"]
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "description": "Possible errors thrown by the function",
+            "items": {
+              "type": "object",
+              "required": ["code", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "Error code"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Error message"
+                },
+                "data": {
+                  "$ref": "#/definitions/schema",
+                  "description": "Schema of the error data"
+                }
+              }
+            }
+          },
+          "requires": {
+            "type": "array",
+            "description": "Requirements for the function",
+            "items": {
+              "type": "string",
+              "description": "Requirement identifier"
+            }
+          },
+          "async": {
+            "type": "boolean",
+            "description": "Whether the function is asynchronous"
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "Whether the function is deprecated"
+          },
+          "instanceMethod": {
+            "type": "boolean",
+            "description": "Whether the function is an instance method"
+          },
+          "staticMethod": {
+            "type": "boolean",
+            "description": "Whether the function is a static method"
+          },
+          "examples": {
+            "type": "array",
+            "description": "Examples of function usage",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the example"
+                },
+                "params": {
+                  "type": "array",
+                  "description": "Example parameter values",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Parameter name"
+                      },
+                      "value": {
+                        "description": "Example value for the parameter"
+                      }
+                    }
+                  }
+                },
+                "result": {
+                  "description": "Example result value"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "constants": {
+      "type": "object",
+      "description": "Constants defined by the module/package",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of the constant"
+          },
+          "value": {
+            "description": "Value of the constant"
+          },
+          "values": {
+            "type": "array",
+            "description": "Possible values for enum constants"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the constant"
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "description": "Reusable components for the module/package",
+      "properties": {
+        "schemas": {
+          "type": "object",
+          "description": "Schema components",
+          "additionalProperties": {
+            "$ref": "#/definitions/schemaObject"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "schema": {
+      "description": "JSON Schema definition or reference",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/schemaObject"
+        },
+        {
+          "type": "object",
+          "required": ["$ref"],
+          "properties": {
+            "$ref": {
+              "type": "string",
+              "description": "Reference to a schema component"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "schemaObject": {
+      "type": "object",
+      "description": "JSON Schema definition",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of the schema",
+          "enum": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "array",
+            "object",
+            "null"
+          ]
+        },
+        "properties": {
+          "type": "object",
+          "description": "Properties of an object schema",
+          "additionalProperties": {
+            "$ref": "#/definitions/schema"
+          }
+        },
+        "items": {
+          "$ref": "#/definitions/schema",
+          "description": "Schema for array items"
+        },
+        "required": {
+          "type": "array",
+          "description": "Required properties for an object schema",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the schema"
+        },
+        "enum": {
+          "type": "array",
+          "description": "Enumeration of allowed values"
+        },
+        "format": {
+          "type": "string",
+          "description": "Format of the schema"
+        },
+        "default": {
+          "description": "Default value for the schema"
+        },
+        "readonly": {
+          "type": "boolean",
+          "description": "Whether the schema is read-only"
+        },
+        "additionalProperties": {
+          "description": "Schema for additional properties",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/schema"
+            }
+          ]
+        },
+        "oneOf": {
+          "type": "array",
+          "description": "List of possible schemas",
+          "items": {
+            "$ref": "#/definitions/schema"
+          }
+        }
+      }
+    }
+  }
+}

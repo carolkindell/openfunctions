@@ -1,0 +1,4 @@
+# see https://developers.cloudflare.com/workers/static-assets/redirects/
+
+/ https://github.com/carolkindell/openfunctions 302
+/schema /openfunctions.schema.json 302
