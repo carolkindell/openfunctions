@@ -2,6 +2,11 @@
 
 An open standard for defining the surfaced interface of registred modules/packages for any language.
 
+Design goals
+
+- much like openapi, this should be a implementation-agnostic way to describe functions, but not for REST APIs alone but for ANY exposed functions, for any programming language.
+- should be fully programming language agnostic.
+
 # Package Managers Across Languages
 
 | Language   | Package Manager       | Command Example                                           | Registry            | Import Style                        |

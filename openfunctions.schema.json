@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "OpenFunctions Schema",
-  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language.\n\nAn openfunctions.json specification should be all that is required to use a library. A openfunctions.json should only define exported functions and classes, and functions/classes that can be created from those functions.",
+  "description": "JSON Schema for the OpenFunctions format - an open standard for defining the surfaced interface of registered modules/packages for any language.\n\nAn openfunctions.json specification should be all that is required to use a library..",
   "type": "object",
   "required": ["openfunctions", "info", "functions"],
   "properties": {
@@ -33,7 +33,7 @@
         }
       }
     },
-    "runtime": {
+    "engines": {
       "type": "object",
       "description": "Runtime requirements for the module/package.",
       "properties": {},
@@ -82,164 +82,8 @@
     },
     "functions": {
       "type": "object",
-      "description": "Mapped object of functions exposed by the module/package. Every key is the function name. For classes use ClassName/constructor and ClassName/publicFunctionName",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["description"],
-        "properties": {
-          "description": {
-            "type": "string",
-            "description": "Description of the function"
-          },
-
-          "exported": {
-            "type": "boolean",
-            "description": "This function can be imported"
-          },
-
-          "returnedFrom": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "This function can be accessed as a result from these other function(s)"
-          },
-
-          "requiredEnvironmentVariables": {
-            "type": "array",
-            "description": "Required Environment Variables for the function",
-            "items": {
-              "type": "string",
-              "description": "Requirement identifier"
-            }
-          },
-          "async": {
-            "type": "boolean",
-            "description": "Whether the function is asynchronous"
-          },
-          "deprecated": {
-            "type": "boolean",
-            "description": "Whether the function is deprecated"
-          },
-
-          "params": {
-            "type": "array",
-            "description": "Parameters accepted by the function",
-            "items": {
-              "type": "object",
-              "required": ["name"],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Name of the parameter"
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Description of the parameter"
-                },
-                "required": {
-                  "type": "boolean",
-                  "description": "Whether the parameter is required"
-                },
-                "schema": {
-                  "$ref": "#/definitions/schema",
-                  "description": "Schema of the parameter"
-                }
-              }
-            }
-          },
-          "result": {
-            "type": "object",
-            "description": "Result of the function",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Name of the result"
-              },
-              "description": {
-                "type": "string",
-                "description": "Description of the result"
-              },
-              "schema": {
-                "$ref": "#/definitions/schema",
-                "description": "Schema of the result"
-              }
-            }
-          },
-          "effects": {
-            "type": "array",
-            "description": "Side effects of the function",
-            "items": {
-              "type": "object",
-              "required": ["pointer", "effect"],
-              "properties": {
-                "pointer": {
-                  "type": "string",
-                  "description": "JSON pointer to the affected state"
-                },
-                "effect": {
-                  "type": "string",
-                  "description": "Type of effect",
-                  "enum": ["push", "update", "delete"]
-                }
-              }
-            }
-          },
-          "errors": {
-            "type": "array",
-            "description": "Possible errors thrown by the function",
-            "items": {
-              "type": "object",
-              "required": ["code", "message"],
-              "properties": {
-                "code": {
-                  "type": "string",
-                  "description": "Error code"
-                },
-                "message": {
-                  "type": "string",
-                  "description": "Error message"
-                },
-                "data": {
-                  "$ref": "#/definitions/schema",
-                  "description": "Schema of the error data"
-                }
-              }
-            }
-          },
-
-          "examples": {
-            "type": "array",
-            "description": "Examples of function usage",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Name of the example"
-                },
-                "params": {
-                  "type": "array",
-                  "description": "Example parameter values",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "description": "Parameter name"
-                      },
-                      "value": {
-                        "description": "Example value for the parameter"
-                      }
-                    }
-                  }
-                },
-                "result": {
-                  "description": "Example result value"
-                }
-              }
-            }
-          }
-        }
-      }
+      "description": "Mapped object of functions exposed by the module/package. Every key is the function or class name.\n\nPlease note: only exported functions are mapped here, functions returned or used in parameters (callbacks) should be defined inline.",
+      "additionalProperties": { "$ref": "#/definitions/function" }
     },
     "constants": {
       "type": "object",
@@ -276,6 +120,7 @@
     "schema": {
       "description": "JSON Schema definition or reference",
       "anyOf": [
+        { "$ref": "#/definitions/function" },
         {
           "$ref": "#/definitions/schemaObject"
         },
@@ -362,6 +207,153 @@
           "description": "List of possible schemas",
           "items": {
             "$ref": "#/definitions/schema"
+          }
+        }
+      }
+    },
+    "function": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": { "type": "string", "enum": ["function"] },
+        "description": {
+          "type": "string",
+          "description": "Description of the function"
+        },
+
+        "requiredEnvironmentVariables": {
+          "type": "array",
+          "description": "Required Environment Variables for the function",
+          "items": {
+            "type": "string",
+            "description": "Requirement identifier"
+          }
+        },
+        "async": {
+          "type": "boolean",
+          "description": "Whether the function is asynchronous"
+        },
+        "deprecated": {
+          "type": "boolean",
+          "description": "Whether the function is deprecated"
+        },
+
+        "params": {
+          "type": "array",
+          "description": "Parameters accepted by the function",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the parameter"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the parameter"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether the parameter is required"
+              },
+              "schema": {
+                "$ref": "#/definitions/schema",
+                "description": "Schema of the parameter"
+              }
+            }
+          }
+        },
+        "result": {
+          "type": "object",
+          "description": "Result of the function",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the result"
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the result"
+            },
+            "schema": {
+              "$ref": "#/definitions/schema",
+              "description": "Schema of the result"
+            }
+          }
+        },
+        "effects": {
+          "type": "array",
+          "description": "Side effects of the function",
+          "items": {
+            "type": "object",
+            "required": ["pointer", "effect"],
+            "properties": {
+              "pointer": {
+                "type": "string",
+                "description": "JSON pointer to the affected state"
+              },
+              "effect": {
+                "type": "string",
+                "description": "Type of effect",
+                "enum": ["push", "update", "delete"]
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "description": "Possible errors thrown by the function",
+          "items": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Error code"
+              },
+              "message": {
+                "type": "string",
+                "description": "Error message"
+              },
+              "data": {
+                "$ref": "#/definitions/schema",
+                "description": "Schema of the error data"
+              }
+            }
+          }
+        },
+
+        "examples": {
+          "type": "array",
+          "description": "Examples of function usage",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the example"
+              },
+              "params": {
+                "type": "array",
+                "description": "Example parameter values",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Parameter name"
+                    },
+                    "value": {
+                      "description": "Example value for the parameter"
+                    }
+                  }
+                }
+              },
+              "result": {
+                "description": "Example result value"
+              }
+            }
           }
         }
       }
