@@ -1,0 +1,856 @@
+{
+  "openfunctions": "1.0.0",
+  "info": {
+    "title": "User API",
+    "version": "1.0.0",
+    "description": "API for managing users in a system",
+    "license": "MIT"
+  },
+  "runtime": {
+    "node": ">=16.0.0"
+  },
+  "environment": {
+    "DATABASE_URL": {
+      "required": true,
+      "description": "URL to connect to the database",
+      "sensitive": true
+    },
+    "API_KEY": {
+      "required": true,
+      "description": "API key for authentication",
+      "sensitive": true
+    }
+  },
+  "functions": {
+    "getUser": {
+      "description": "Get a user by ID",
+      "exported": true,
+      "async": true,
+      "params": [
+        {
+          "name": "request",
+          "description": "HTTP request object",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pathname": {
+                "type": "string",
+                "enum": ["/users/{id}"],
+                "description": "Path of the request"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["GET"],
+                "description": "HTTP method"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID of the user to retrieve"
+                  }
+                },
+                "required": ["id"]
+              },
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "pattern": "Bearer .*",
+                    "description": "Bearer token for authentication"
+                  },
+                  "accept": {
+                    "type": "string",
+                    "enum": ["application/json"],
+                    "description": "Expected response format"
+                  }
+                },
+                "required": ["authorization"]
+              }
+            },
+            "required": ["pathname", "method", "params"]
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "description": "HTTP response object",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "enum": [200, 401, 404],
+              "description": "HTTP status code"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {
+                "content-type": {
+                  "type": "string",
+                  "enum": ["application/json"],
+                  "description": "Content type of the response"
+                }
+              }
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/User"
+                },
+                {
+                  "$ref": "#/components/schemas/Error"
+                }
+              ]
+            }
+          },
+          "required": ["status", "headers", "body"]
+        }
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "Invalid or missing authorization token"
+        },
+        {
+          "code": "NOT_FOUND",
+          "message": "User not found"
+        }
+      ],
+      "examples": [
+        {
+          "name": "Get user by ID",
+          "params": [
+            {
+              "name": "request",
+              "value": {
+                "pathname": "/users/123",
+                "method": "GET",
+                "params": {
+                  "id": "123"
+                },
+                "headers": {
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "accept": "application/json"
+                }
+              }
+            }
+          ],
+          "result": {
+            "status": 200,
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": {
+              "id": "123",
+              "name": "John Doe",
+              "email": "john@example.com",
+              "role": "user",
+              "createdAt": "2023-01-01T00:00:00Z"
+            }
+          }
+        }
+      ]
+    },
+    "createUser": {
+      "description": "Create a new user",
+      "exported": true,
+      "async": true,
+      "params": [
+        {
+          "name": "request",
+          "description": "HTTP request object",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pathname": {
+                "type": "string",
+                "enum": ["/users"],
+                "description": "Path of the request"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["POST"],
+                "description": "HTTP method"
+              },
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "pattern": "Bearer .*",
+                    "description": "Bearer token for authentication"
+                  },
+                  "content-type": {
+                    "type": "string",
+                    "enum": ["application/json"],
+                    "description": "Content type of the request"
+                  }
+                },
+                "required": ["authorization", "content-type"]
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email of the user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "Password of the user"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "admin"],
+                    "default": "user",
+                    "description": "Role of the user"
+                  }
+                },
+                "required": ["name", "email", "password"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["pathname", "method", "headers", "body"]
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "description": "HTTP response object",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "enum": [201, 400, 401, 409],
+              "description": "HTTP status code"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {
+                "content-type": {
+                  "type": "string",
+                  "enum": ["application/json"],
+                  "description": "Content type of the response"
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Location of the created resource"
+                }
+              }
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/User"
+                },
+                {
+                  "$ref": "#/components/schemas/Error"
+                }
+              ]
+            }
+          },
+          "required": ["status", "headers", "body"]
+        }
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "Invalid or missing authorization token"
+        },
+        {
+          "code": "BAD_REQUEST",
+          "message": "Invalid request body"
+        },
+        {
+          "code": "CONFLICT",
+          "message": "User with this email already exists"
+        }
+      ],
+      "examples": [
+        {
+          "name": "Create user",
+          "params": [
+            {
+              "name": "request",
+              "value": {
+                "pathname": "/users",
+                "method": "POST",
+                "headers": {
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "content-type": "application/json"
+                },
+                "body": {
+                  "name": "Jane Smith",
+                  "email": "jane@example.com",
+                  "password": "securepassword",
+                  "role": "admin"
+                }
+              }
+            }
+          ],
+          "result": {
+            "status": 201,
+            "headers": {
+              "content-type": "application/json",
+              "location": "/users/456"
+            },
+            "body": {
+              "id": "456",
+              "name": "Jane Smith",
+              "email": "jane@example.com",
+              "role": "admin",
+              "createdAt": "2023-01-02T00:00:00Z"
+            }
+          }
+        }
+      ]
+    },
+    "updateUser": {
+      "description": "Update an existing user",
+      "exported": true,
+      "async": true,
+      "params": [
+        {
+          "name": "request",
+          "description": "HTTP request object",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pathname": {
+                "type": "string",
+                "enum": ["/users/{id}"],
+                "description": "Path of the request"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["PUT", "PATCH"],
+                "description": "HTTP method"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID of the user to update"
+                  }
+                },
+                "required": ["id"]
+              },
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "pattern": "Bearer .*",
+                    "description": "Bearer token for authentication"
+                  },
+                  "content-type": {
+                    "type": "string",
+                    "enum": ["application/json"],
+                    "description": "Content type of the request"
+                  }
+                },
+                "required": ["authorization", "content-type"]
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email of the user"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "admin"],
+                    "description": "Role of the user"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": ["pathname", "method", "params", "headers", "body"]
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "description": "HTTP response object",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "enum": [200, 400, 401, 404, 409],
+              "description": "HTTP status code"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {
+                "content-type": {
+                  "type": "string",
+                  "enum": ["application/json"],
+                  "description": "Content type of the response"
+                }
+              }
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/User"
+                },
+                {
+                  "$ref": "#/components/schemas/Error"
+                }
+              ]
+            }
+          },
+          "required": ["status", "headers", "body"]
+        }
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "Invalid or missing authorization token"
+        },
+        {
+          "code": "BAD_REQUEST",
+          "message": "Invalid request body"
+        },
+        {
+          "code": "NOT_FOUND",
+          "message": "User not found"
+        },
+        {
+          "code": "CONFLICT",
+          "message": "User with this email already exists"
+        }
+      ],
+      "examples": [
+        {
+          "name": "Update user",
+          "params": [
+            {
+              "name": "request",
+              "value": {
+                "pathname": "/users/123",
+                "method": "PATCH",
+                "params": {
+                  "id": "123"
+                },
+                "headers": {
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "content-type": "application/json"
+                },
+                "body": {
+                  "name": "John Doe Updated",
+                  "role": "admin"
+                }
+              }
+            }
+          ],
+          "result": {
+            "status": 200,
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": {
+              "id": "123",
+              "name": "John Doe Updated",
+              "email": "john@example.com",
+              "role": "admin",
+              "createdAt": "2023-01-01T00:00:00Z",
+              "updatedAt": "2023-01-03T00:00:00Z"
+            }
+          }
+        }
+      ]
+    },
+    "deleteUser": {
+      "description": "Delete a user by ID",
+      "exported": true,
+      "async": true,
+      "params": [
+        {
+          "name": "request",
+          "description": "HTTP request object",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pathname": {
+                "type": "string",
+                "enum": ["/users/{id}"],
+                "description": "Path of the request"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["DELETE"],
+                "description": "HTTP method"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID of the user to delete"
+                  }
+                },
+                "required": ["id"]
+              },
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "pattern": "Bearer .*",
+                    "description": "Bearer token for authentication"
+                  }
+                },
+                "required": ["authorization"]
+              }
+            },
+            "required": ["pathname", "method", "params", "headers"]
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "description": "HTTP response object",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "enum": [204, 401, 404],
+              "description": "HTTP status code"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {}
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/Error"
+                }
+              ]
+            }
+          },
+          "required": ["status", "headers"]
+        }
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "Invalid or missing authorization token"
+        },
+        {
+          "code": "NOT_FOUND",
+          "message": "User not found"
+        }
+      ],
+      "examples": [
+        {
+          "name": "Delete user",
+          "params": [
+            {
+              "name": "request",
+              "value": {
+                "pathname": "/users/123",
+                "method": "DELETE",
+                "params": {
+                  "id": "123"
+                },
+                "headers": {
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          ],
+          "result": {
+            "status": 204,
+            "headers": {},
+            "body": null
+          }
+        }
+      ]
+    },
+    "listUsers": {
+      "description": "List all users with pagination and filtering",
+      "exported": true,
+      "async": true,
+      "params": [
+        {
+          "name": "request",
+          "description": "HTTP request object",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pathname": {
+                "type": "string",
+                "enum": ["/users"],
+                "description": "Path of the request"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["GET"],
+                "description": "HTTP method"
+              },
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "authorization": {
+                    "type": "string",
+                    "pattern": "Bearer .*",
+                    "description": "Bearer token for authentication"
+                  },
+                  "accept": {
+                    "type": "string",
+                    "enum": ["application/json"],
+                    "description": "Expected response format"
+                  }
+                },
+                "required": ["authorization"]
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "string",
+                    "pattern": "^[0-9]+$",
+                    "description": "Page number for pagination"
+                  },
+                  "limit": {
+                    "type": "string",
+                    "pattern": "^[0-9]+$",
+                    "description": "Number of items per page"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "admin"],
+                    "description": "Filter users by role"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "enum": [
+                      "name",
+                      "email",
+                      "createdAt",
+                      "-name",
+                      "-email",
+                      "-createdAt"
+                    ],
+                    "description": "Sort field and direction (prefix with - for descending)"
+                  }
+                }
+              }
+            },
+            "required": ["pathname", "method", "headers"]
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "description": "HTTP response object",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "enum": [200, 401],
+              "description": "HTTP status code"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {
+                "content-type": {
+                  "type": "string",
+                  "enum": ["application/json"],
+                  "description": "Content type of the response"
+                }
+              }
+            },
+            "body": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "description": "Total number of pages"
+                        },
+                        "page": {
+                          "type": "integer",
+                          "description": "Current page number"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "description": "Number of items per page"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "$ref": "#/components/schemas/Error"
+                }
+              ]
+            }
+          },
+          "required": ["status", "headers", "body"]
+        }
+      },
+      "errors": [
+        {
+          "code": "UNAUTHORIZED",
+          "message": "Invalid or missing authorization token"
+        }
+      ],
+      "examples": [
+        {
+          "name": "List users",
+          "params": [
+            {
+              "name": "request",
+              "value": {
+                "pathname": "/users",
+                "method": "GET",
+                "headers": {
+                  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "accept": "application/json"
+                },
+                "query": {
+                  "page": "1",
+                  "limit": "10",
+                  "role": "admin",
+                  "sort": "-createdAt"
+                }
+              }
+            }
+          ],
+          "result": {
+            "status": 200,
+            "headers": {
+              "content-type": "application/json"
+            },
+            "body": {
+              "data": [
+                {
+                  "id": "456",
+                  "name": "Jane Smith",
+                  "email": "jane@example.com",
+                  "role": "admin",
+                  "createdAt": "2023-01-02T00:00:00Z"
+                },
+                {
+                  "id": "789",
+                  "name": "Bob Johnson",
+                  "email": "bob@example.com",
+                  "role": "admin",
+                  "createdAt": "2023-01-01T12:00:00Z"
+                }
+              ],
+              "pagination": {
+                "total": 2,
+                "pages": 1,
+                "page": 1,
+                "limit": 10
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "admin"],
+            "description": "Role of the user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation date of the user"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update date of the user"
+          }
+        },
+        "required": ["id", "name", "email", "role", "createdAt"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional error details"
+          }
+        },
+        "required": ["code", "message"]
+      }
+    }
+  }
+}
