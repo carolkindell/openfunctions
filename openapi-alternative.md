@@ -56,9 +56,9 @@ const openfunctionsForRequestResponseExample = { getRoot: {
               "content-type": { type: "string"; enum: ["application/json"] };
             };
           };
-          body: { type: "object"; properties: {} };
-        };
-      };
+          body: { type: "object"; properties: {} }
+        }
+      }
     },
   ],
   result: {
